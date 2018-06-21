@@ -216,14 +216,12 @@ public class MediaPlayerService extends Service {
         Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON, null, appContext, MediaButtonReceiver.class);
         mediaSession.setMediaButtonReceiver(PendingIntent.getBroadcast(appContext, 0, mediaButtonIntent, 0));
     }
-
     private MediaSessionCompat.Callback mediaSessionCallback = new MediaSessionCompat.Callback() {
         int currentState = PlaybackStateCompat.STATE_STOPPED;
-
         @Override
         public void onPlay() {
             super.onPlay();
-            //Toast.makeText(MediaPlayerService.this, "Play", Toast.LENGTH_SHORT).show();
+            startService(new Intent(getApplicationContext(), MediaPlayerService.class));
             // Get audio from storage
             try {
                 StorageUtil storage = new StorageUtil(getApplicationContext());
@@ -238,9 +236,7 @@ public class MediaPlayerService extends Service {
             } else {
                 stopSelf();
             }
-
             updateMetaData();
-
             int audioFocusResult = audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
             if (audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                 return;
@@ -251,7 +247,6 @@ public class MediaPlayerService extends Service {
 
             mediaSession.setPlaybackState(stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1).build());
             currentState = PlaybackStateCompat.STATE_PLAYING;
-
             refreshNotificationAndForegroundStatus(currentState);
         }
 
